@@ -164,6 +164,6 @@ plt.figure(figsize=(10, 8))
 plt.plot(1+np.arange(e), e_loss, label='Training Loss')
 plt.plot(1+np.arange(e), e_val_loss, label='Validation Loss')
 plt.plot(1+np.arange(e), e_val_score,
-         label='Validation Score(Dice Coefficient)')
+         label='Validation Score(Accuracy)')
 plt.legend()
 plt.show()
