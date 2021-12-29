@@ -9,7 +9,6 @@ class Encoder(nn.Module):
     def __init__(self, encoded_space_dim, fc2_input_dim):
         super().__init__()
 
-        ### Convolutional section
         self.encoder_cnn = nn.Sequential(
             nn.Conv2d(3, 16, 7, padding=1),
             nn.ReLU(True),
@@ -28,9 +27,7 @@ class Encoder(nn.Module):
             nn.ReLU(True),
         )
 
-        ### Flatten layer
         self.flatten = nn.Flatten(start_dim=1)
-### Linear section
         self.encoder_lin = nn.Sequential(
             nn.Linear(31 * 31 * 64, 128),
             nn.ReLU(True),
