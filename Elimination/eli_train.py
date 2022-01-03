@@ -20,13 +20,14 @@ warnings.filterwarnings("ignore")
 
 PATH = config.PATH0
 d = config.ENCODED_DIM
-batch_size = int(sys.argv[-1])
+batch_size = int(sys.argv[-2])
+lr = float(sys.argv[-1])
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 
 
 dataset = EliDataset(
-    'csv_files/elimination_1000_samples.csv',
+    'csv_files/elimination_5000_samples.csv',
     transform=config.transform
 )
 
@@ -65,7 +66,7 @@ max_val_score = 0
 e = 0
 
 model = AutoEncoder(encoded_space_dim=d).to(device)
-optimizer = torch.optim.Adam(model.parameters(),lr=config.LEARNING_RATE,weight_decay=config.WEIGHT_DECAY)
+optimizer = torch.optim.Adam(model.parameters(),lr=lr,weight_decay=config.WEIGHT_DECAY)
 
 #print(model)
 
@@ -138,7 +139,6 @@ for epoch in range(epochs):
             min_val_loss = val_epoch_loss
         else:
             epochs_no_improve += 1
-
         
         if val_epoch_score > max_val_score:
             print('val_score>max_val_score', max_val_score)
@@ -146,12 +146,10 @@ for epoch in range(epochs):
             print('Model Saved at:', str(PATH),"\n")
             epochs_no_improve = 0
             max_val_score = val_epoch_score
-
         else:
             epochs_no_improve += 1
         
         n_iter += 1
-
         if epoch > 5 and epochs_no_improve == n_epochs_stop:
             print('Early stopping!')
             early_stop = True
