@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import timm
-from efficientnet_pytorch import EfficientNet
+import torchvision.models as models
+
 
 
 class BaselineModel(nn.Module):
@@ -48,7 +49,7 @@ class BaselineModel(nn.Module):
     
 
 class Baseline_enet(nn.Module):
-    def __init__(self, out_dim):
+    def __init__(self, out_dim=1):
         super(Baseline_enet, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 3, stride=1, padding=1, bias=False)
         self.conv2 = nn.Conv2d(6, 12, 3, stride=1, padding=1, bias=False)
@@ -70,7 +71,7 @@ class Baseline_enet(nn.Module):
             nn.ReLU6(),
         )
         self.myfc = nn.Linear(self.enet.classifier.in_features, out_dim)
-        self.enet.classifier = nn.Identity()
+        self.enet.classifier = nn.Sigmoid()
 
     def extract(self, x):
         x = F.relu6(self.mybn1(self.conv1(x)))
@@ -81,15 +82,19 @@ class Baseline_enet(nn.Module):
 
     def forward(self, x):
         x = self.extract(x)
-        x = F.avg_pool2d(x, x.size()[2:]).reshape(-1, 1000)
+        #x = F.avg_pool2d(x, x.size()[2:]).reshape(-1, 1000)
         x = self.myfc(self.dropout(x))
-        return x
+        return self.enet.classifier(x)
     
     
 class Model(nn.Module):
-    def __init__(self):
+    def __init__(self, pretrained):
         super(Model, self).__init__()
-        self.resnetmodel = EfficientNet.from_pretrained('efficientnet-b3')
+        self.pretrained = pretrained
+        if self.pretrained == False:
+            self.model = models.mobilenet_v3_small()
+        else:
+            self.model = models.mobilenet_v3_small(pretrained=True)
 
         self.fc = nn.Sequential(nn.Linear(1000, 512), nn.ReLU(),
                                 nn.Linear(512, 1),nn.ReLU(),
@@ -99,15 +104,16 @@ class Model(nn.Module):
                                 nn.Sigmoid())
 
     def forward(self, x):
-        x = self.resnetmodel(x)
+        x = self.model(x)
         #x = F.avg_pool2d(x, x.size()[2:]).reshape(-1, 3072)
         
         return self.fc(x)  
 
 if __name__ == "__main__":
-    model = Model()
-    #print(model)
-    x = torch.randn((2, 3,512,512))
+    model = Model(pretrained=False)
+    #model = models.mobilenet_v3_small()
+    print(model)
+    x = torch.randn((4, 3,512,512))
     out = model(x)
     
     print(out)
