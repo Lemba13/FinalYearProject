@@ -13,18 +13,22 @@ class AutoEncoder(nn.Module):
         self.encoder_cnn = nn.Sequential(
             nn.Conv2d(3, 16, 7, padding=1),
             nn.ReLU(True),
+            #nn.Dropout(0.2),
             nn.MaxPool2d(2),
             
             nn.Conv2d(16, 32, 5, padding=1),
             nn.ReLU(True),
+            nn.Dropout(0.1),
             nn.MaxPool2d(2),
             
             nn.Conv2d(32, 64 , 5, padding=1),
             nn.ReLU(True),
+            nn.Dropout(0.2),
             nn.MaxPool2d(2),
             
             nn.Conv2d(64, 64, 5, padding = 1),
             nn.ReLU(True),
+            nn.Dropout(0.25),
             nn.MaxPool2d(2),
             
             nn.Conv2d(64, 128, 3, padding=1),
@@ -33,6 +37,7 @@ class AutoEncoder(nn.Module):
             
             nn.Conv2d(128, 128, 3, padding=1),
             nn.ReLU(True),
+            nn.Dropout(0.4),
             nn.MaxPool2d(2),
             
             nn.Conv2d(128, 256, 3, padding=1),
@@ -121,4 +126,3 @@ if __name__ == "__main__":
     loss = criterion(res,x)
     print(res.shape)
     print(loss)
-
