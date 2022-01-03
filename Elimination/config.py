@@ -5,16 +5,18 @@ import torch
 
 
 BATCH_SIZE = 8
-LEARNING_RATE = 0.0001
+LEARNING_RATE = 0.001
 NUM_EPOCHS = 30
 STEP_SIZE = 10
 GAMMA = 0.5
 EPOCH_THRES = 8
 WEIGHT_DECAY = 0.00001
+ENCODED_DIM = 32
 PATH = 'weights/baseline_model_steganalysis.pt'
+PATH0 = 'weights/baseline_model_elimination.pt'
 
 transform = A.Compose([
-    #A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     ToTensorV2(),
 ])
 
