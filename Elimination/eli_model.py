@@ -19,15 +19,11 @@ class AutoEncoder(nn.Module):
             nn.ReLU(True),
             nn.MaxPool2d(2),
             
-            nn.Conv2d(32, 32 , 5, padding=1),
+            nn.Conv2d(32, 64 , 5, padding=1),
             nn.ReLU(True),
             nn.MaxPool2d(2),
             
-            nn.Conv2d(32, 64, 3, padding = 1),
-            nn.ReLU(True),
-            nn.MaxPool2d(2),
-            
-            nn.Conv2d(64, 64, 3, padding=1),
+            nn.Conv2d(64, 64, 5, padding = 1),
             nn.ReLU(True),
             nn.MaxPool2d(2),
             
@@ -39,7 +35,11 @@ class AutoEncoder(nn.Module):
             nn.ReLU(True),
             nn.MaxPool2d(2),
             
-            nn.Conv2d(128, 128, 3, padding=1),
+            nn.Conv2d(128, 256, 3, padding=1),
+            nn.ReLU(True),
+            nn.MaxPool2d(2),
+            
+            nn.Conv2d(256, 512, 3, padding=1),
             nn.ReLU(True),
         )
 
@@ -47,7 +47,7 @@ class AutoEncoder(nn.Module):
         self.flatten = nn.Flatten(start_dim=1)
 ### Linear section
         self.encoder_lin = nn.Sequential(
-            nn.Linear(3*3*128, 256),
+            nn.Linear(3*3*512, 256),
             nn.ReLU(True),
             nn.Linear(256, encoded_space_dim)
         )
@@ -55,14 +55,17 @@ class AutoEncoder(nn.Module):
         self.decoder_lin = nn.Sequential(
             nn.Linear(encoded_space_dim, 256),
             nn.ReLU(True),
-            nn.Linear(256, 3*3*128),
+            nn.Linear(256, 3*3*512),
             nn.ReLU(True)
         )
 
-        self.unflatten = nn.Unflatten(dim=1, unflattened_size=(128, 3, 3))
+        self.unflatten = nn.Unflatten(dim=1, unflattened_size=(512, 3, 3))
 
         self.decoder_conv = nn.Sequential(
-            nn.ConvTranspose2d(128, 128, 3, stride=2),
+            nn.ConvTranspose2d(512, 256, 3, stride=2),
+            nn.ReLU(True),
+
+            nn.ConvTranspose2d(256, 128, 3, stride=2),
             nn.ReLU(True),
 
             nn.ConvTranspose2d(128, 128, 3, stride=2),
@@ -71,13 +74,10 @@ class AutoEncoder(nn.Module):
             nn.ConvTranspose2d(128, 64, 3, stride=2),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(64, 64, 3, stride=2),
+            nn.ConvTranspose2d(64, 64, 3, stride=2, padding=1),
             nn.ReLU(True),
 
-            nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1),
-            nn.ReLU(True),
-
-            nn.ConvTranspose2d(32, 32, 5, stride=2, padding=1),
+            nn.ConvTranspose2d(64, 32, 5, stride=2, padding=1),
             nn.ReLU(True),
 
             nn.ConvTranspose2d(32, 16, 5, stride=2, output_padding=1),
@@ -121,3 +121,4 @@ if __name__ == "__main__":
     loss = criterion(res,x)
     print(res.shape)
     print(loss)
+
