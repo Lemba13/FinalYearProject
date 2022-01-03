@@ -2,7 +2,6 @@ from torch import optim
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
-from torchvision import models
 import numpy as np
 from model import BaselineModel, Baseline_enet,Model
 from tqdm import tqdm
@@ -19,7 +18,8 @@ warnings.filterwarnings("ignore")
 
 
 PATH = config.PATH
-batch_size = int(sys.argv[-1])
+batch_size = int(sys.argv[-2])
+lr = float(sys.argv[-1])
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 
@@ -62,15 +62,15 @@ min_val_loss = np.Inf
 max_val_score = 0
 e = 0
 
-model = Model().to(device)
-optimizer = torch.optim.AdamW(model.parameters(), lr=config.LEARNING_RATE,weight_decay=config.WEIGHT_DECAY)
+model = Model(pretrained=False).to(device)
+optimizer = torch.optim.AdamW(model.parameters(), lr=lr,weight_decay=config.WEIGHT_DECAY)
 
 #print(model)
 
 writer = SummaryWriter()
 scheduler = StepLR(optimizer, step_size=config.STEP_SIZE,gamma=config.GAMMA, verbose=True)
 
-criterion = nn.BCEWithLogitsLoss()
+criterion = nn.BCELoss()
 
 for epoch in range(epochs):
     print('Epoch {}/{}, lr:{}'.format(epoch + 1,
