@@ -46,7 +46,7 @@ class BaselineModel(nn.Module):
             nn.Dropout2d(p=dropout)
         )
         return seq_block
-    
+
 
 class Baseline_enet(nn.Module):
     def __init__(self, out_dim=1):
@@ -85,8 +85,8 @@ class Baseline_enet(nn.Module):
         #x = F.avg_pool2d(x, x.size()[2:]).reshape(-1, 1000)
         x = self.myfc(self.dropout(x))
         return self.enet.classifier(x)
-    
-    
+
+
 class Model(nn.Module):
     def __init__(self, pretrained):
         super(Model, self).__init__()
@@ -99,15 +99,67 @@ class Model(nn.Module):
         self.fc = nn.Sequential(nn.Linear(1000, 512), nn.ReLU(),
                                 nn.Linear(512, 1),nn.ReLU(),
                                 nn.Sigmoid())
-        
+
         self.fc1 = nn.Sequential(nn.Linear(3072,1),
                                 nn.Sigmoid())
 
     def forward(self, x):
         x = self.model(x)
         #x = F.avg_pool2d(x, x.size()[2:]).reshape(-1, 3072)
-        
-        return self.fc(x)  
+
+        return self.fc(x)
+
+
+def initialize_model(model_name, num_classes, use_pretrained=True):
+    model_ft = None
+    input_size = 0
+
+    if model_name == "resnet":
+        #Resnet18
+        model_ft = models.resnet34(pretrained=use_pretrained)
+        num_ftrs = model_ft.fc.in_features
+        model_ft.fc = nn.Sequential(nn.Linear(num_ftrs, num_classes), nn.Sigmoid())
+        input_size = 224
+
+    elif model_name == "alexnet":
+        #Alexnet
+        model_ft = models.alexnet(pretrained=use_pretrained)
+        num_ftrs = model_ft.classifier[6].in_features
+        model_ft.classifier[6] = nn.Sequential(nn.Linear(num_ftrs, num_classes), nn.Sigmoid())
+        input_size = 224
+
+    elif model_name == "vgg":
+        #VGG11_bn
+        model_ft = models.vgg11_bn(pretrained=use_pretrained)
+        num_ftrs = model_ft.classifier[6].in_features
+        model_ft.classifier[6] = nn.Sequential(nn.Linear(num_ftrs, num_classes), nn.Sigmoid())
+        input_size = 224
+
+    elif model_name == "squeezenet":
+        #Squeezenet
+        model_ft = models.squeezenet1_0(pretrained=use_pretrained)
+        model_ft.classifier[1] = nn.Sequential(nn.Conv2d(512, num_classes, kernel_size=(1, 1), stride=(1, 1)),nn.Sigmoid())
+        model_ft.num_classes = num_classes
+
+    elif model_name == "densenet":
+        #Densenet
+        model_ft = models.densenet121(pretrained=use_pretrained)
+        num_ftrs = model_ft.classifier.in_features
+        model_ft.classifier = nn.Sequential(nn.Linear(num_ftrs, num_classes), nn.Sigmoid())
+
+    elif model_name == "inception":
+        #Inception v3
+        model_ft = models.inception_v3(pretrained=use_pretrained)
+        num_ftrs = model_ft.AuxLogits.fc.in_features
+        model_ft.AuxLogits.fc = nn.Linear(num_ftrs, num_classes)
+        num_ftrs = model_ft.fc.in_features
+        model_ft.fc = nn.Sequential(nn.Linear(num_ftrs, num_classes), nn.Sigmoid())
+
+    else:
+        print("Invalid model name, exiting...")
+        exit()
+
+    return model_ft
 
 if __name__ == "__main__":
     model = Model(pretrained=False)
@@ -115,5 +167,5 @@ if __name__ == "__main__":
     print(model)
     x = torch.randn((4, 3,512,512))
     out = model(x)
-    
+
     print(out)
