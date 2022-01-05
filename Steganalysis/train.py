@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 import numpy as np
-from model import BaselineModel, Baseline_enet,Model
+from model import BaselineModel, Baseline_enet,Model,initialize_model
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from dataset import StegDataset
@@ -62,7 +62,8 @@ min_val_loss = np.Inf
 max_val_score = 0
 e = 0
 
-model = Model(pretrained=False).to(device)
+model_ft = initialize_model('vgg',1,use_pretrained=True)
+model = model_ft.to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=lr,weight_decay=config.WEIGHT_DECAY)
 
 #print(model)
